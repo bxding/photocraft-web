@@ -38,7 +38,7 @@ class NativeBuildTests(unittest.TestCase):
             (old_output / "stale.txt").write_text("old build")
             with patch.dict(main.__globals__, {
                 "ROOT": root, "run": run,
-                "install_tools": lambda checkout, tools, env: tools / "trunk",
+                "install_tools": lambda tools, env: tools / "trunk",
             }), patch("platform.system", return_value="Linux"), \
                     patch("subprocess.check_output", return_value="abc123\n"):
                 main()
@@ -49,7 +49,7 @@ class NativeBuildTests(unittest.TestCase):
             build_env = calls[1][1]["env"]
             self.assertEqual(build_env["PHOTOCRAFT_BUILD_SHA"], "abc123")
             self.assertEqual(build_env["CARGO_BUILD_JOBS"], os.environ.get("CARGO_BUILD_JOBS", "2"))
-            self.assertNotIn("docker", [call[0][0] for call in calls])
+            self.assertEqual((old_output / "robots.txt").read_text(), "User-agent: *\nDisallow: /\n")
 
 
 if __name__ == "__main__":

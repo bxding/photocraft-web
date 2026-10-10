@@ -1,5 +1,0 @@
-*
-!Dockerfile
-!nginx.conf
-!scripts/
-!scripts/download-release.py

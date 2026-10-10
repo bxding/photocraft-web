@@ -6,7 +6,6 @@ import io
 import os
 from pathlib import Path
 import platform
-import re
 import shutil
 import subprocess
 import tarfile
@@ -16,6 +15,7 @@ from urllib.request import Request, urlopen
 from prepare_pages import prepare_site
 
 ROOT = Path(__file__).resolve().parent.parent
+TRUNK_VERSION = "0.21.14"
 
 
 def run(*args, **kwargs):
@@ -28,7 +28,7 @@ def download(url):
         return response.read()
 
 
-def install_tools(checkout, tools, env):
+def install_tools(tools, env):
     cargo_bin = Path(env.get("CARGO_HOME", str(Path.home() / ".cargo"))) / "bin"
     env["PATH"] = str(cargo_bin) + os.pathsep + env.get("PATH", "")
     env["RUSTUP_TOOLCHAIN"] = "stable"
@@ -40,16 +40,12 @@ def install_tools(checkout, tools, env):
     run("rustup", "toolchain", "install", "stable", "--profile", "minimal",
         "--target", "wasm32-unknown-unknown", env=env)
 
-    # Follow upstream's Trunk pin without compiling Trunk itself.
-    recipe = (checkout / "Dockerfile").read_text()
-    match = re.search(r"^ARG TRUNK_VERSION=(\d+\.\d+\.\d+)\s*$", recipe, re.MULTILINE)
-    if not match:
-        raise ValueError("Cannot find upstream's TRUNK_VERSION in Dockerfile")
+    # Install the pinned Trunk binary instead of compiling the build tool.
     arch = {"x86_64": "x86_64", "aarch64": "aarch64"}.get(platform.machine())
     if platform.system() != "Linux" or not arch:
         raise ValueError("This build command requires Linux amd64/arm64 (the Pages builder)")
     asset = f"trunk-{arch}-unknown-linux-musl.tar.gz"
-    url = f"https://github.com/trunk-rs/trunk/releases/download/v{match[1]}/{asset}"
+    url = f"https://github.com/trunk-rs/trunk/releases/download/v{TRUNK_VERSION}/{asset}"
     archive = download(url)
     checksum = download(url + ".sha256").decode().split()[0]
     if hashlib.sha256(archive).hexdigest() != checksum:
@@ -79,7 +75,7 @@ def copy_notices(checkout, site):
 
 def main():
     if platform.system() != "Linux":
-        raise SystemExit("Use this script in the Linux Pages builder; for local Docker builds use deploy-pages.py.")
+        raise SystemExit("Run this script in the Linux Cloudflare Pages builder.")
     work_root = ROOT / ".pages"
     work_root.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="build-", dir=work_root) as directory:
@@ -97,7 +93,7 @@ def main():
         env["PHOTOCRAFT_BUILD_DATE"] = f"{datetime.now(timezone.utc):%Y-%m-%d}"
         tools = work / "tools"
         tools.mkdir()
-        trunk = install_tools(checkout, tools, env)
+        trunk = install_tools(tools, env)
         # Build directly so upstream's release ZIP size gate doesn't reject a
         # large WASM before our chunking step can handle it.
         run(str(trunk), "build", "--release", "--locked",

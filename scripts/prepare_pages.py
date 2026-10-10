@@ -34,6 +34,7 @@ def prepare_site(source, destination):
             raise ValueError(f"Static Pages only; refusing {path.name}")
 
     shutil.copytree(source, destination)
+    shutil.copy2(Path(__file__).resolve().parent.parent / "robots.txt", destination / "robots.txt")
     index = destination / "index.html"
     html = index.read_text()
     wasm_files = sorted(destination.rglob("*.wasm"))

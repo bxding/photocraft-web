@@ -84,7 +84,9 @@ globalThis.fetch = async url => new Response(await readFile(url));
 
     def test_small_wasm_and_bootstrap_unchanged(self):
         make_site(self.source, wasm_module())
+        (self.source / "robots.txt").write_text("User-agent: *\nAllow: /\n")
         prepare_site(self.source, self.output)
+        self.assertEqual((self.output / "robots.txt").read_text(), "User-agent: *\nDisallow: /\n")
         self.assertEqual((self.source / "index.html").read_text(), (self.output / "index.html").read_text())
         self.assertEqual((self.output / "app_bg.wasm").read_bytes(), wasm_module())
 

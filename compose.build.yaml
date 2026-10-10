@@ -1,7 +1,0 @@
-services:
-  photocraft:
-    image: photocraft-web:local
-    build:
-      context: .
-      args:
-        PHOTOCRAFT_VERSION: latest
