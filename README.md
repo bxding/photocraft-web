@@ -32,6 +32,20 @@ For a Docker-based proxy, use a shared network and `http://photocraft:8080`.
 
 ## Cloudflare Pages (bleeding-edge main)
 
+Connect this GitHub repo to a **Pages** project:
+
+- Framework preset: **None**
+- Build command: `python3 scripts/build-pages.py`
+- Build output directory: `.pages/public`
+- Production branch: `main`
+
+Each push here builds the latest PhotoCraft `main`. Upstream commits alone don't trigger a build.
+WASM is split into 19 MB chunks. No Workers or Functions.
+Pages has a [20-minute build timeout](https://developers.cloudflare.com/pages/platform/limits/); a cold Rust build may exceed it.
+An existing Direct Upload project needs a new Git-connected Pages project for automatic builds.
+
+### Manual deployment
+
 Requires Docker running, Git, Python 3, and Node.js 22+.
 
 ```sh
