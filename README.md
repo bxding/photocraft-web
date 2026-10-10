@@ -1,4 +1,4 @@
-# PhotoCraft Docker
+# PhotoCraft Web
 
 PhotoCraft web release. Automatic image updates are currently disabled.
 

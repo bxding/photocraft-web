@@ -11,7 +11,7 @@ import zipfile
 
 
 def fetch(url):
-    request = Request(url, headers={"User-Agent": "photocraft-web-docker"})
+    request = Request(url, headers={"User-Agent": "photocraft-web"})
     with urlopen(request, timeout=120) as response:
         return response.read()
 
