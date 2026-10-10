@@ -87,7 +87,10 @@ globalThis.fetch = async url => new Response(await readFile(url));
         (self.source / "robots.txt").write_text("User-agent: *\nAllow: /\n")
         prepare_site(self.source, self.output)
         self.assertEqual((self.output / "robots.txt").read_text(), "User-agent: *\nDisallow: /\n")
-        self.assertEqual((self.source / "index.html").read_text(), (self.output / "index.html").read_text())
+        output_html = (self.output / "index.html").read_text()
+        self.assertIn("const wasm = await init({ module_or_path: './app_bg.wasm' });", output_html)
+        self.assertIn('<script defer src="./instance-notice-', output_html)
+        self.assertEqual(len(list(self.output.glob("instance-notice-*.js"))), 1)
         self.assertEqual((self.output / "app_bg.wasm").read_bytes(), wasm_module())
 
     def test_rejects_other_oversized_files(self):

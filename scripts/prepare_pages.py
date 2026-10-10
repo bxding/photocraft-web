@@ -85,6 +85,14 @@ def prepare_site(source, destination):
         wasm.unlink()
         print(f"Split {relative}: {len(data):,} bytes into {len(chunks)} chunks")
 
+    notice = (Path(__file__).resolve().parent.parent / "static/instance-notice.js").read_bytes()
+    notice_name = f"instance-notice-{hashlib.sha256(notice).hexdigest()[:16]}.js"
+    (destination / notice_name).write_bytes(notice)
+    html, count = re.subn(r"(<head\b[^>]*>)", lambda match: match.group() +
+                         f'\n<script defer src="./{notice_name}"></script>', html,
+                         count=1, flags=re.IGNORECASE)
+    if count != 1:
+        raise ValueError("Cannot insert instance notice: index.html has no head element")
     index.write_text(html)
     # Stale precompressed copies would contain the old loader or oversized WASM.
     # Pages handles HTTP compression; upload only the uncompressed static assets.

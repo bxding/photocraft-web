@@ -1,0 +1,33 @@
+name: Trigger Pages rebuild
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: pages-deploy-hook
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Trigger Cloudflare Pages
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$DEPLOY_HOOK_URL" ]; then
+            echo "::error::Add the CLOUDFLARE_PAGES_DEPLOY_HOOK repository secret."
+            exit 1
+          fi
+          status=$(curl --fail --silent --show-error --max-time 60 \
+            --request POST --output /dev/null --write-out '%{http_code}' \
+            --url "$DEPLOY_HOOK_URL")
+          case "$status" in
+            2??) echo "Pages rebuild requested." ;;
+            *) echo "::error::Deploy hook returned HTTP $status"; exit 1 ;;
+          esac
