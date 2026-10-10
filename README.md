@@ -1,6 +1,6 @@
 # PhotoCraft Docker
 
-Latest stable PhotoCraft web release. Images published daily by GitHub Actions.
+PhotoCraft web release. Automatic image updates are currently disabled.
 
 Save as `docker-compose.yaml`:
 
