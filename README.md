@@ -1,6 +1,6 @@
 # PhotoCraft Web
 
-Bleeding-edge [PhotoCraft](https://github.com/storytold/photocraft) on Cloudflare Pages.
+Nightly WASM [PhotoCraft](https://github.com/storytold/photocraft) builds deployed on Cloudflare Pages.
 
 Connect this repo to a **Pages** project:
 
@@ -11,7 +11,7 @@ Output directory:  .pages/public
 Production branch: main
 ```
 
-Each push here builds the latest upstream `main`. Upstream commits alone don't trigger a build.
+Each push here builds the latest upstream `main`.
 
 ## Rebuild every 6 hours
 
